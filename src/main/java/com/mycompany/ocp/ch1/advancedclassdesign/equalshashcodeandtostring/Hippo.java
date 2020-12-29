@@ -6,8 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * toString()
@@ -33,7 +32,7 @@ import java.util.List;
  *
  * hashCode()
  * Как мы знаем, если не переопределять метод hashCode(), он возвращает какое-то уникальное число по умолчанию. hashCode()
- * используется, когда хранится объект как key в map.
+ * используется, когда хранится объект в HashSet(), как key в HashMap().
  * Главные правила hashCode():
  * 1. С одной и той же программой, результат hashCode() должен не меняться. Это означает, что Вы не должны включать
  * переменные, которые меняются. В нашем Hippo name можно включить, weight - нет, поскольку вес регулярно меняется.
@@ -92,7 +91,7 @@ public class Hippo {
         Hippo hippo2 = new Hippo("Harry", 3100);
         System.out.println("hippo1 equals hippo2?: " + hippo2.equals(hippo1));
 
-        //Как проверить работу equals?
+        //Как проверить работу equals()?
         List<Hippo> list = new ArrayList<>();
         list.add(new Hippo("Harry", 3100));
         list.add(new Hippo("Jenny", 2700));
@@ -100,10 +99,57 @@ public class Hippo {
         list.remove(new Hippo("Jenny", 2700));  //если equals() правильно переопределен, объект с именем Jenny будет удален
         list.forEach(System.out::println);
 
-        //Как проверить работу hashCode?
+        //Как проверить работу hashCode()?
+        //1. если equals()=false, hashCode()=одинаковый, то объект будет добавлен (т.е. объекты якобы разные, неважно, что hash одинаковый)
+        //2. если equals()=true, hashCode()=одинаковый, то объект не будет добавлен (т.е. объекты якобы одинаковые и hash одинаковый, объект точно не будет добавлен, это правильное переопределение и дубликаты не разрешается добавлять)
+        //3. если equals()=true, hashCode()=разный, то объект будет добавлен (т.е. объекты якобы одинаковые, но hash разный)
+        //4. если equals()=false, hashCode()=разный, то объект будет добавлен (т.е. объекты якобы разные и hash разный)
+        Set<Dog> set = new HashSet<>();
+        set.add(new Dog("Jim"));
+        set.add(new Dog("Ji"));
+        System.out.println(set.size());
+        set.forEach(System.out::println);
 
+        System.out.println(set.contains(new Dog("Ji")));
+        //если equals()=false, hashCode()=одинаковый, объекты (new Dog("Jim"), new Dog("Ji")) добавятся оба (size()=2), но contains("Ji") вернет false (ТАК ДЕЛАТЬ НЕЛЬЗЯ!!!)
+        //если equals()=true, hashCode()=одинаковый, объекты (new Dog("Jim"), new Dog("Ji") добавится только "Jim", но contains("Ji") вернет true (ТАК ДЕЛАТЬ НЕЛЬЗЯ!!!)
+        //если equals()=true, hashCode()=разный, объекты (new Dog("Jim"), new Dog("Ji")) добавятся оба (size()=2), contains("Ji") вернет true (ЭТО ПРАВИЛЬНОЕ РЕШЕНИЕ!!!)
+        //если equals()=false, hashCode()=разный, объекты (new Dog("Jim"), new Dog("Ji")) добавятся оба (size()=2), но contains("Ji") вернет false (ТАК ДЕЛАТЬ НЕЛЬЗЯ!!!)
 
+        //то же самое мы наблюдаем в HashMap.
+        Map<Dog, Integer> map = new HashMap<>();
+        map.put(new Dog("Jim"),5);
+        map.put(new Dog("Ji"),5);
+        System.out.println(map.size());
+        map.forEach((dog, integer) -> System.out.println(dog + " " + integer));
+        System.out.println(map.containsKey(new Dog("Ji")));
+        System.out.println(Integer.parseInt("3cbbc1e0",16));
+    }
 
+}
+
+class Dog {
+    private String name;
+
+    public Dog(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    //equals() указан неправильно, чисто в ознакомительных целях!
+    @Override
+    public boolean equals(Object o) {
+        return false;
+    }
+
+    //hashCode() указан неправильно, чисто в ознакомительных целях!
+    @Override
+    public int hashCode() {
+        return name.length();
     }
 
 }
